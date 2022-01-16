@@ -1,0 +1,79 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+notify:
+  webhooks:
+    - url: https://production-reviewee-api.herokuapp.com/notification/ci
+    - url: https://production-reviewee-api.herokuapp.com/notification/microsoftTeams
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:12.17.0
+
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/mongo:3.4.4
+
+    working_directory: ~/omni-api
+
+    environment:
+      - REVIEWEE_URL: https://production-reviewee-api.herokuapp.com
+      - COMMITS_CHECK_ENDPOINT: repository/omni-api/haveRejectedCommits
+      - COMMITS_CHECK_INDICATOR: \"success\":true
+
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - run:
+          name: Install Docker client
+          command: sudo apt-get install -y docker
+
+      - setup_remote_docker:
+          docker_layer_caching: false
+
+      - run:
+          name: Install Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+
+      - run:
+          name: Build docker-compose images
+          command: docker-compose -f docker/docker-compose.yml build
+
+      - run:
+          name: Up docker-compose
+          command: docker-compose -f docker/docker-compose.yml up -d
+
+      - run:
+          name: Wait for database up
+          command: sleep 10
+
+      - run:
+          name: Run migrations
+          command: docker-compose -f docker/docker-compose.yml exec node-api yarn db:migrate
+
+      - run:
+          name: Run seeds
+          command: docker-compose -f docker/docker-compose.yml exec node-api yarn db:runSeed
+
+      - run:
+          name: Run tests
+          command: docker-compose -f docker/docker-compose.yml exec node-api yarn test

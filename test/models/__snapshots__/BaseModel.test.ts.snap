@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BaseModel TestCase should throw error if table not set 1`] = `"Table name is not set"`;

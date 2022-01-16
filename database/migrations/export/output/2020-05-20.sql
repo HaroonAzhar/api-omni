@@ -1,0 +1,5 @@
+CREATE TABLE [Origination].[AmlKyc] ([AmlKycId] int identity(1,1) not null primary key, [FkApplicantId] int not null, [Aml] bit not null, [AmlDetails] nvarchar(max), [Ccj] bit not null, [CcjDetails] nvarchar(max), [Cifas] bit not null, [CifasDetails] nvarchar(max), [CreditSafe] bit not null, [CreditSafeDetails] nvarchar(max), [GoogleSearch] bit not null, [GoogleSearchDetails] nvarchar(max), [ProofOfAddress] nvarchar(100) not null, [ProofOfAddressDetails] nvarchar(max) not null, [ProofOfId] nvarchar(100) not null, [ProofOfIdDetails] nvarchar(max) not null, [createdAt] datetime2, CONSTRAINT [origination_amlkyc_fkapplicantid_foreign] FOREIGN KEY ([FkApplicantId]) REFERENCES [Origination].[Applicant] ([ApplicantId]))
+GO
+ALTER TABLE [Origination].[PropertyValuationReport] ADD [Surveyor] nvarchar(255)
+GO
+DELETE  from Origination.ApplicantCompany where ApplicantCompanyId = 25

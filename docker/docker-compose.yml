@@ -1,0 +1,14 @@
+version: '3'
+services:
+  node-api:
+    env_file:
+      - .env
+    build:
+      context: ../
+      dockerfile: docker/application/Dockerfile
+    links:
+      - db
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile

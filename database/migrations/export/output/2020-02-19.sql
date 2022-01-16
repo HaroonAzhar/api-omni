@@ -1,0 +1,1 @@
+ALTER TABLE [Origination].[DipLoanFinancialDetails] alter column [IntermediaryComissionFeePercent] decimal(38, 4)
